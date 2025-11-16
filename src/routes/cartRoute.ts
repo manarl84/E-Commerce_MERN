@@ -1,6 +1,6 @@
 import express from 'express';
 import type {Request, Response} from 'express';
-import { addItemToCart, getActiveCartForUser } from '../services/cartService.js';
+import { addItemToCart, getActiveCartForUser, updateItemInCart } from '../services/cartService.js';
 import validateJWT from '../middlewares/validateJWT.js';
 import { type ExtendRequest } from "../types/extendedRequest.js";
 
@@ -27,6 +27,13 @@ router.post ('/items', validateJWT, async (req: ExtendRequest, res: Response) =>
     const { productId, quantity } = req.body; // Destructuring assignment
 
     const response = await addItemToCart({userId, productId, quantity});
+    res.status(response.statusCode).send(response.data);
+});
+
+router.put ('/items', validateJWT, async (req: ExtendRequest, res: Response) => {
+    const userId = req?.user?._id; // Optional chaining to ensure user exists
+    const { productId, quantity } = req.body;
+    const response = await updateItemInCart({userId, productId, quantity});
     res.status(response.statusCode).send(response.data);
 });
 
