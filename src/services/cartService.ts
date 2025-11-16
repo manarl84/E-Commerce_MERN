@@ -34,6 +34,21 @@ export const getActiveCartForUser = async ({userId}: GetActiveCartForUser) => {
     return cart;
 }
 
+interface ClearCart {
+    userId: string;
+}
+
+export const clearCart = async ({userId}:ClearCart) => {
+
+    const cart = await getActiveCartForUser({userId});
+    cart.items = [];
+    cart.totalAmount = 0;
+    const updatedCart = await cart.save();
+    return { data: updatedCart, statusCode: 200 };
+
+}
+
+
 interface addItemToCart {
     userId: string;
     productId: any;

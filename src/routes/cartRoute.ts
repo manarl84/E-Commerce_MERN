@@ -1,6 +1,6 @@
 import express from 'express';
 import type {Request, Response} from 'express';
-import { addItemToCart, deleteItemInCart, getActiveCartForUser, updateItemInCart } from '../services/cartService.js';
+import { addItemToCart, clearCart, deleteItemInCart, getActiveCartForUser, updateItemInCart } from '../services/cartService.js';
 import validateJWT from '../middlewares/validateJWT.js';
 import { type ExtendRequest } from "../types/extendedRequest.js";
 
@@ -21,7 +21,13 @@ router.get('/', validateJWT, async (req: ExtendRequest, res) => {
     res.status(200).send(cart);
 });
 
-router.post ('/items', validateJWT, async (req: ExtendRequest, res: Response) => {
+router.delete ('/', validateJWT, async (req: ExtendRequest, res) => {
+    const userId = req?.user?._id;
+    const response = await clearCart({userId});
+    res.status(response.statusCode).send(response.data);
+});
+
+router.post ('/items', validateJWT, async (req: ExtendRequest, res) => {
     const userId = req.user._id;
     //const body = req.body;
     const { productId, quantity } = req.body; // Destructuring assignment
@@ -30,18 +36,20 @@ router.post ('/items', validateJWT, async (req: ExtendRequest, res: Response) =>
     res.status(response.statusCode).send(response.data);
 });
 
-router.put ('/items', validateJWT, async (req: ExtendRequest, res: Response) => {
+router.put ('/items', validateJWT, async (req: ExtendRequest, res) => {
     const userId = req?.user?._id; // Optional chaining to ensure user exists
     const { productId, quantity } = req.body;
     const response = await updateItemInCart({userId, productId, quantity});
     res.status(response.statusCode).send(response.data);
 });
 
-router.delete ('/items/:productId', validateJWT, async (req: ExtendRequest, res: Response) => {
+router.delete ('/items/:productId', validateJWT, async (req: ExtendRequest, res) => {
     const userId = req?.user?._id;
     const {productId} = req.params;
     const response = await deleteItemInCart({userId, productId});
     res.status(response.statusCode).send(response.data);
 });
+
+
 
 export default router;
