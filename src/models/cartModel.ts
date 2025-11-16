@@ -4,7 +4,7 @@ import type { IProduct } from './productModel.js';
 
 const cartStatusEnum = ['active', 'completed', 'cancelled']
 
-export interface ICartItem extends Document {
+export interface ICartItem {
     product: IProduct;
     unitPrice: number;
     quantity: number;
