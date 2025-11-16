@@ -1,5 +1,5 @@
 import { parse } from "path";
-import { cartModel } from "../models/cartModel.js";
+import { cartModel, type ICart, type ICartItem } from "../models/cartModel.js";
 import { productModel } from "../models/productModel.js";
 
 
@@ -105,10 +105,7 @@ export const updateItemInCart = async ({userId, productId, quantity}: addItemToC
 
     //Calculate total amount for the cart
 
-    let total = otherCartItems.reduce((sum, product) => {
-        sum += product.unitPrice * product.quantity
-        return sum;
-    }, 0);
+    let total = calculateCartTotalItems({cartItems: otherCartItems})
 
     existInCart.quantity = quantity; // Update the quantity
     total += existInCart.unitPrice * existInCart.quantity;
@@ -117,5 +114,41 @@ export const updateItemInCart = async ({userId, productId, quantity}: addItemToC
     const updatedCart = await cart.save();
 
     return { data: updatedCart, statusCode: 200 };
+
+}
+
+interface deleteItemInCart {
+    userId: string;
+    productId: any;
+}
+
+export const deleteItemInCart = async ({userId, productId}: deleteItemInCart) => {
+    const cart = await getActiveCartForUser({userId});
+    const existInCart = cart.items.find((p) => p.product.toString() === productId);
+    if (!existInCart) {
+        return { data: 'Product does not exist in the cart', statusCode: 400 };
+    }
+    const otherCartItems = cart.items.filter((p) => p.product.toString() !== productId);
+    
+    const total = calculateCartTotalItems({cartItems: otherCartItems})
+    cart.items = otherCartItems;
+    cart.totalAmount = total;
+    
+    const updatedCart = await cart.save();
+
+    return { data: updatedCart, statusCode: 200 };
+}
+
+
+// Abstracted function to calculate total amount of cart items
+const calculateCartTotalItems = ({cartItems}: {cartItems: ICartItem[]}) => {
+
+    
+    const total = cartItems.reduce((sum, product) => {
+        sum += product.unitPrice * product.quantity
+        return sum;
+    }, 0);
+
+    return total;
 
 }
