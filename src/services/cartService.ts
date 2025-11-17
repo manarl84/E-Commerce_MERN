@@ -1,6 +1,7 @@
 import { parse } from "path";
 import { cartModel, type ICart, type ICartItem } from "../models/cartModel.js";
 import { productModel } from "../models/productModel.js";
+import { orderModel, type IOrderItem } from "../models/orderModel.js";
 
 
 interface CreateCartForUser {
@@ -49,13 +50,13 @@ export const clearCart = async ({userId}:ClearCart) => {
 }
 
 
-interface addItemToCart {
+interface AddItemToCart {
     userId: string;
     productId: any;
     quantity: number;
 }
 
-export const addItemToCart = async ({productId, quantity, userId}:addItemToCart) => {
+export const addItemToCart = async ({productId, quantity, userId}:AddItemToCart) => {
     const cart = await getActiveCartForUser({userId});
     
     // Does the item already exist in the cart?
@@ -98,7 +99,7 @@ interface UpdateItemInCart {
 }
 
 
-export const updateItemInCart = async ({userId, productId, quantity}: addItemToCart) => {
+export const updateItemInCart = async ({userId, productId, quantity}: UpdateItemInCart) => {
     const cart = await getActiveCartForUser({userId});
     const existInCart = cart.items.find((p) => p.product.toString() === productId);
     if (!existInCart) {
@@ -132,12 +133,12 @@ export const updateItemInCart = async ({userId, productId, quantity}: addItemToC
 
 }
 
-interface deleteItemInCart {
+interface DeleteItemInCart {
     userId: string;
     productId: any;
 }
 
-export const deleteItemInCart = async ({userId, productId}: deleteItemInCart) => {
+export const deleteItemInCart = async ({userId, productId}: DeleteItemInCart) => {
     const cart = await getActiveCartForUser({userId});
     const existInCart = cart.items.find((p) => p.product.toString() === productId);
     if (!existInCart) {
@@ -155,6 +156,7 @@ export const deleteItemInCart = async ({userId, productId}: deleteItemInCart) =>
 }
 
 
+
 // Abstracted function to calculate total amount of cart items
 const calculateCartTotalItems = ({cartItems}: {cartItems: ICartItem[]}) => {
 
@@ -165,5 +167,60 @@ const calculateCartTotalItems = ({cartItems}: {cartItems: ICartItem[]}) => {
     }, 0);
 
     return total;
+
+}
+
+interface Checkout {
+    userId: string;
+    address: string;
+}
+
+export const checkout = async ({userId, address}: Checkout) => {
+
+    if (!address || address.trim() === '') {
+        return { data: 'Address is required for checkout', statusCode: 400 };
+    }
+
+    const cart = await getActiveCartForUser({userId});
+
+    const orderItems: IOrderItem[] = [];
+
+    // Loop on cartItems to create oderItems
+
+    for (const item of cart.items) { // of like forEach 
+
+        const product = await productModel.findById(item.product);
+
+        if (!product) {
+            return { data: `Product with id ${item.product} not found`, statusCode: 400 };
+        }
+
+        const orderItem: IOrderItem = {
+            productTitle: product.title,
+            productImage: product.image,
+            unitPrice: item.unitPrice,
+            quantity: item.quantity,
+        }   
+        orderItems.push(orderItem);
+    }
+
+    const order = await orderModel.create({
+        orderItems,
+        total: cart.totalAmount,
+        address, // In real app, address should be declated in User Model as Address Array , from user profile or input
+        userId,
+    });
+
+    await order.save();
+
+    // Update the cart status to be completed
+
+    cart.status = 'completed';
+    await cart.save();
+
+    return { data: order, statusCode: 200 };
+
+    // Deduct stock from products --> Suggested by Copilot
+    // Create order --> Suggested by Copilot
 
 }
