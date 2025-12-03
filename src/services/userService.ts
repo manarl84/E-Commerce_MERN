@@ -65,7 +65,7 @@ catch (error) {
 
 const generateJWT = (data:any) => {
     try {
-        return jwt.sign(data, 'j71FqEQKQoHiukox9MVmT4j6WuhIbXnP');
+        return jwt.sign(data,process.env.JWT_SECRET || ''); // || '' will be generate an error if JWT_SECRET is undefined
     }
     catch (error) {
         throw new Error('Error generating JWT');    
