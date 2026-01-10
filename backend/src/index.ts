@@ -7,12 +7,14 @@ import userRoute from './routes/userRoute.js';
 import productRoute from './routes/productRoute.js';
 import { seedIntialProducts } from './services/productService.js';
 import cartRoute from './routes/cartRoute.js';
+import cors from 'cors';
 
 
 const app = express();
 const PORT = 3001;
 
 app.use(express.json());
+app.use(cors());
 
 
 console.log(process.env.DATABASE_URL);
