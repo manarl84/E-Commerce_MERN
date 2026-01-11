@@ -18,7 +18,7 @@ import { useNavigate } from 'react-router';
 
 function ResponsiveAppBar() {
 
-  const {username, isAuthenticated} = useAuth();
+  const {username, isAuthenticated, logout} = useAuth();
 
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
 
@@ -34,6 +34,12 @@ function ResponsiveAppBar() {
   const handleLogin = () => {
    // window.location.href = '/login';  // redirect to login page - Suggested by ChatGPT
     navigate('/login');
+  }
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');  // redirection must be to a page that is not protected
+    handleCloseUserMenu();
   }
 
 
@@ -120,7 +126,7 @@ function ResponsiveAppBar() {
                   </Typography>
                 </MenuItem>
 
-                <MenuItem onClick={handleCloseUserMenu}>
+                <MenuItem onClick={handleLogout}>
                   <Typography sx={{ textAlign: "center" }}>
                     Logout
                   </Typography>
