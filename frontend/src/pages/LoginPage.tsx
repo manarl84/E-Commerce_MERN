@@ -9,12 +9,12 @@ import { useAuth } from "../context/Auth/AuthContext";
 import { useNavigate } from "react-router";
 
 
-const RegisterPage = () => {
+
+
+const LoginPage = () => {
 
     const [error, setError] = useState<string>("");
 
-    const firstNameRef = useRef<HTMLInputElement>(null)
-    const lastNameRef = useRef<HTMLInputElement>(null)
     const emailRef = useRef<HTMLInputElement>(null)
     const passwordRef = useRef<HTMLInputElement>(null)   
 
@@ -23,29 +23,27 @@ const RegisterPage = () => {
     const {login} = useAuth();
 
     const onSubmit = async () => {
-        const firstName = firstNameRef.current?.value;
-        const lastName = lastNameRef.current?.value;        
+      
         const email = emailRef.current?.value;
         const password = passwordRef.current?.value;
 
         // simple validation for empty fields using negative check
-        if (!firstName || !lastName || !email || !password) {
+        if (!email || !password) {
             setError("Please fill all the fields");
             return;
         }
 
-        console.log("Registering user with details:", { firstName, lastName, email, password });
+        console.log("Registering user with details:", { email, password });
 
         // make the call to the backend API to register the user
-        const response = await fetch(`${BASE_URL}/user/register`, {
+        const response = await fetch(`${BASE_URL}/user/login`, {
 
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                firstName,  
-                lastName,
+
                 email,
                 password 
             
@@ -65,7 +63,7 @@ const RegisterPage = () => {
     }
     
     login(email!, token); // update the auth context with the logged in user info
-    navigate("/"); // redirect to home page after successful registration
+    navigate("/"); // redirect to home page after successful login
 
     console.log("User Token:", token);
 
@@ -82,7 +80,7 @@ const RegisterPage = () => {
           mt: 4,
         }}
       >
-        <Typography variant="h6" color="grey">Register New Account</Typography>
+        <Typography variant="h6" color="grey">Login to Your Account</Typography>
         <Box
           sx={{
             display: "flex",
@@ -97,11 +95,9 @@ const RegisterPage = () => {
             borderRadius: 2,
           }}
         >
-          <TextField inputRef={firstNameRef} label="First Name" name="firstName" />
-          <TextField inputRef={lastNameRef} label="Last Name" name="lastName" />
           <TextField inputRef={emailRef}  label="Email" name="email" />
           <TextField inputRef={passwordRef} type="password" label="Password" name="password" />
-          <Button onClick={onSubmit} variant="contained">Register</Button>
+          <Button onClick={onSubmit} variant="contained">Login</Button>
           <div>{error && <Typography color="error">{error}</Typography>}</div>
         </Box>
       </Box>
@@ -109,4 +105,4 @@ const RegisterPage = () => {
   );
 }
 
-export default RegisterPage;
+export default LoginPage;
