@@ -13,10 +13,14 @@ import AdbIcon from '@mui/icons-material/Adb';
 import { useAuth } from '../context/Auth/AuthContext';
 import { Button, Grid } from '@mui/material';
 import { useNavigate } from 'react-router';
-
+import { styled } from '@mui/material/styles';
+import Badge, { badgeClasses } from '@mui/material/Badge';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCartOutlined';
 
 
 function ResponsiveAppBar() {
+
+
 
   const {username, isAuthenticated, logout} = useAuth();
 
@@ -42,6 +46,16 @@ function ResponsiveAppBar() {
     handleCloseUserMenu();
   }
 
+const CartBadge = styled(Badge)`
+  & .${badgeClasses.badge} {
+    top: -12px;
+    right: -6px;
+  }
+`;
+
+const handleCart = () => {
+    navigate('/cart');
+}
 
   return (
     <AppBar position="static">
@@ -80,59 +94,83 @@ function ResponsiveAppBar() {
               </Typography>
             </Box>
 
-            <Box sx={{ flexGrow: 0 }}>
-              
-              {isAuthenticated ? <>
+            <Box
+              display="flex"
+              flexDirection="row"
+              gap={4}
+              alignItems="center"
+              justifyContent="center"
+            >
+              <IconButton onClick={handleCart}>
+                <ShoppingCartIcon fontSize="small" sx={{color: '#ffffff'}} />
+                <CartBadge
+                  badgeContent={2}
+                  color="secondary"
+                  overlap="circular"
+                />
+              </IconButton>
 
-              <Tooltip title="Open settings">
-                <Grid
-                  container
-                  spacing={2}
-                  alignItems="center"
-                  justifyContent="center"
+              {isAuthenticated ? (
+                <>
+                  <Tooltip title="Open settings">
+                    <Grid
+                      container
+                      spacing={2}
+                      alignItems="center"
+                      justifyContent="center"
+                    >
+                      <Grid>
+                        <Typography>{username}</Typography>
+                      </Grid>
+                      <Grid>
+                        <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                          <Avatar
+                            alt={username || ""}
+                            src="/static/images/avatar/2.jpg"
+                          />
+                        </IconButton>
+                      </Grid>
+                    </Grid>
+                  </Tooltip>
+                  <Menu
+                    sx={{ mt: "45px" }}
+                    id="menu-appbar"
+                    anchorEl={anchorElUser}
+                    anchorOrigin={{
+                      vertical: "top",
+                      horizontal: "right",
+                    }}
+                    keepMounted
+                    transformOrigin={{
+                      vertical: "top",
+                      horizontal: "right",
+                    }}
+                    open={Boolean(anchorElUser)}
+                    onClose={handleCloseUserMenu}
+                  >
+                    <MenuItem onClick={handleCloseUserMenu}>
+                      <Typography sx={{ textAlign: "center" }}>
+                        Profile
+                      </Typography>
+                    </MenuItem>
+
+                    <MenuItem onClick={handleLogout}>
+                      <Typography sx={{ textAlign: "center" }}>
+                        Logout
+                      </Typography>
+                    </MenuItem>
+                  </Menu>
+                </>
+              ) : (
+                <Button
+                  variant="contained"
+                  color="success"
+                  onClick={handleLogin}
                 >
-                  <Grid>
-                    <Typography>{username}</Typography>
-                  </Grid>
-                  <Grid>
-                    <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                      <Avatar
-                        alt={username || ""}
-                        src="/static/images/avatar/2.jpg"
-                      />
-                    </IconButton>
-                  </Grid>
-                </Grid>
-              </Tooltip>
-              <Menu
-                sx={{ mt: "45px" }}
-                id="menu-appbar"
-                anchorEl={anchorElUser}
-                anchorOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-                open={Boolean(anchorElUser)}
-                onClose={handleCloseUserMenu}
-              >
-                <MenuItem onClick={handleCloseUserMenu}>
-                  <Typography sx={{ textAlign: "center" }}>
-                    Profile
-                  </Typography>
-                </MenuItem>
-
-                <MenuItem onClick={handleLogout}>
-                  <Typography sx={{ textAlign: "center" }}>
-                    Logout
-                  </Typography>
-                </MenuItem>
-              </Menu>
-              </> : <Button variant='contained' color='success' onClick={handleLogin}> Login </Button>}
+                  {" "}
+                  Login{" "}
+                </Button>
+              )}
             </Box>
           </Box>
         </Toolbar>
