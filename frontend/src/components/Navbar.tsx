@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router';
 import { styled } from '@mui/material/styles';
 import Badge, { badgeClasses } from '@mui/material/Badge';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCartOutlined';
+import { useCart } from '../context/Cart/CartContext';
 
 
 function ResponsiveAppBar() {
@@ -27,6 +28,8 @@ function ResponsiveAppBar() {
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
 
   const navigate = useNavigate();
+
+  const {cartItems} = useCart();
     
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget);
@@ -70,29 +73,31 @@ const handleCart = () => {
               width: "100%",
             }}
           >
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <AdbIcon onClick={() => navigate('/')} sx={{ display: "flex", mr: 1 }} />
-              <Typography
-                variant="h6"
-                noWrap
-                component="a"
+            <Button sx={{color:'#ffffff'}} onClick={() => navigate('/')}>
+              <Box
                 sx={{
-                  mr: 2,
-                  display: { xs: "none", md: "flex" },
-                  fontFamily: "monospace",
-                  fontWeight: 700,
-                  color: "inherit",
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
                 }}
               >
-                Tech Hub
-              </Typography>
-            </Box>
+                <AdbIcon sx={{ display: "flex", mr: 1 }} />
+                <Typography
+                  variant="h6"
+                  noWrap
+                  component="a"
+                  sx={{
+                    mr: 2,
+                    display: { xs: "none", md: "flex" },
+                    fontFamily: "monospace",
+                    fontWeight: 700,
+                    color: "inherit",
+                  }}
+                >
+                  Tech Hub
+                </Typography>
+              </Box>
+            </Button>
 
             <Box
               display="flex"
@@ -104,7 +109,7 @@ const handleCart = () => {
               <IconButton onClick={handleCart}>
                 <ShoppingCartIcon fontSize="small" sx={{color: '#ffffff'}} />
                 <CartBadge
-                  badgeContent={2}
+                  badgeContent={cartItems.length}
                   color="secondary"
                   overlap="circular"
                 />

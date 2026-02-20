@@ -1,4 +1,4 @@
-import { useState, type FC, type PropsWithChildren } from "react";
+import { useEffect, useState, type FC, type PropsWithChildren } from "react";
 import { CartContext } from "./CartContext";
 import { type CartItem } from "../../types/CartItem";
 import { BASE_URL } from "../../constants/baseUrl";
@@ -11,6 +11,49 @@ const CartProvider: FC<PropsWithChildren> = ({ children }) => {
   const [totalAmount, setTotalAmount] = useState<number>(0);
   const [error, setError] = useState("");
 
+
+      useEffect(() => {
+
+        if (!token) {
+            setError("User is not authenticated.");
+            console.log("User is not authenticated.");
+            return;
+        }
+
+        const fetchCart = async () => {
+            const response = await fetch(`${BASE_URL}/cart`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+            
+            if (!response.ok) {
+                setError("Failed to fetch user cart, please try again later.");
+                return;
+            }
+
+                  const cart = await response.json();
+                  if (!cart || !Array.isArray(cart.items)) {
+                    setError("Failed to parse cart data.");
+                    return;
+                  }
+
+                  const cartItemsMapped = cart.items.map(({ product, quantity }: {product: any, quantity: number }) => ({
+                    productId: product?._id ?? product ?? "",
+                    title: product?.title ?? "",
+                    image: product?.image ?? "",
+                    quantity: quantity ?? 0,
+                    unitPrice: product?.price ?? 0,
+                  }));
+                  setCartItems(cartItemsMapped);
+                  setTotalAmount(cart.totalAmount);
+        }
+
+        fetchCart();
+    }, [token]);
+    
 
   const addItemToCart = async (productId: string) => {
     try {
