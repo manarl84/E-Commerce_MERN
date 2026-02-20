@@ -39,7 +39,7 @@ if (error) {
         
         // Better way to pass all props using spread operator
         prodcuts.map((p) => (
-          <Grid size={4}>
+          <Grid key={p._id} size={4}>
             <ProductCard {...p} />
           </Grid>
         )) 

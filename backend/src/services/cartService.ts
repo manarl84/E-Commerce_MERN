@@ -29,14 +29,22 @@ const createCartForUser = async ({userId}: CreateCartForUser) => {
 
 interface GetActiveCartForUser {
     userId: string;
+    populateProducts?: boolean;
 }
 
 
-export const getActiveCartForUser = async ({userId}: GetActiveCartForUser) => {
+export const getActiveCartForUser = async ({userId, populateProducts}: GetActiveCartForUser) => {
 
     try {
 
-        let cart = await cartModel.findOne({userId, status: 'active'}); // find the active cart for the user
+        let cart;
+
+        if (populateProducts) {
+
+            cart = await cartModel.findOne({userId, status: 'active'}).populate('items.product') // populate the product details in the cart items
+        } else{
+            cart = await cartModel.findOne({userId, status: 'active'}) // find the active cart for the user
+        }
 
         if (!cart) {
 
@@ -86,8 +94,23 @@ export const addItemToCart = async ({productId, quantity, userId}:AddItemToCart)
         const existInCart = cart.items.find((p) => p.product.toString() === productId); //product is ObjectId & productId is string so we use .toString()
 
         if (existInCart) {
-            // Update quantity OR Simply return a simply message like below
-            return { data: 'Product already exists in the cart', statusCode: 400 };
+            // If the product already exists, increase its quantity
+            const product = await productModel.findById(productId);
+            if (!product) {
+                return { data: 'Product not found', statusCode: 400 };
+            }
+
+            const newQuantity = existInCart.quantity + quantity;
+            if (product.stock < newQuantity) {
+                return { data: 'Insufficient stock for the product', statusCode: 400 };
+            }
+
+            existInCart.quantity = newQuantity;
+            cart.totalAmount += product.price * quantity;
+            await cart.save();
+
+            const populated = await getActiveCartForUser({userId, populateProducts: true});
+            return { data: populated, statusCode: 200 };
         }
 
         // else fetch the product by its id
@@ -110,9 +133,10 @@ export const addItemToCart = async ({productId, quantity, userId}:AddItemToCart)
 
         cart.totalAmount += product.price * quantity;
 
-        const updatedCart = await cart.save();
+        await cart.save();
 
-        return { data: updatedCart, statusCode: 200 }; 
+        const populated = await getActiveCartForUser({userId, populateProducts: true});
+        return { data: populated, statusCode: 200 };
     }
     catch (error) {
         return { data: 'Internal Server Error', statusCode: 500 };
@@ -159,9 +183,10 @@ export const updateItemInCart = async ({userId, productId, quantity}: UpdateItem
         total += existInCart.unitPrice * existInCart.quantity;
 
         cart.totalAmount = total;
-        const updatedCart = await cart.save();
+        await cart.save();
 
-        return { data: updatedCart, statusCode: 200 };
+        const populated = await getActiveCartForUser({userId, populateProducts: true});
+        return { data: populated, statusCode: 200 };
 
     }
         catch (error) {
@@ -189,9 +214,10 @@ export const deleteItemInCart = async ({userId, productId}: DeleteItemInCart) =>
         cart.items = otherCartItems;
         cart.totalAmount = total;
         
-        const updatedCart = await cart.save();
+        await cart.save();
 
-        return { data: updatedCart, statusCode: 200 };
+        const populated = await getActiveCartForUser({userId, populateProducts: true});
+        return { data: populated, statusCode: 200 };
     }
 
     catch (error) {

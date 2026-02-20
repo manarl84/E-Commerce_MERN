@@ -77,7 +77,7 @@ const handleCart = () => {
                 alignItems: "center",
               }}
             >
-              <AdbIcon sx={{ display: "flex", mr: 1 }} />
+              <AdbIcon onClick={() => navigate('/')} sx={{ display: "flex", mr: 1 }} />
               <Typography
                 variant="h6"
                 noWrap
