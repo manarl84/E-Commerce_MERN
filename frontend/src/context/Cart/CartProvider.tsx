@@ -9,7 +9,7 @@ const CartProvider: FC<PropsWithChildren> = ({ children }) => {
   const {token} = useAuth();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [totalAmount, setTotalAmount] = useState<number>(0);
-  const [error, setError] = useState("");
+  const [err, setError] = useState("");
 
 
       useEffect(() => {
@@ -96,8 +96,45 @@ const CartProvider: FC<PropsWithChildren> = ({ children }) => {
     }
   };
 
+  const UpdateItemInCart = async (productId: string, quantity: number) => {
+    try {
+      const response = await fetch(`${BASE_URL}/cart/items`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({ productId, quantity }),
+      });
+      if (!response.ok) {
+        const text = await response.text();
+        setError(`Failed to update item in cart. ${text || response.statusText}`);
+        return;
+      }
+
+      const cart = await response.json();
+      if (!cart || !Array.isArray(cart.items)) {
+        return;
+      }
+
+      const cartItemsMapped = cart.items.map(({ product, quantity, unitPrice }: {product: any, quantity: number, unitPrice: number }) => ({
+        productId: product?._id ?? product ?? "",
+        title: product?.title ?? "",
+        image: product?.image ?? "",
+        quantity: quantity ?? 0,
+        unitPrice: unitPrice ?? 0,
+      }));
+
+      setCartItems(cartItemsMapped);
+      setTotalAmount(cart.totalAmount);
+      setError("");
+    } catch (error) {
+        setError("Failed to update item in cart: " + (error as any).message);
+    }
+  };  
+
   return (
-    <CartContext.Provider value={{ cartItems, totalAmount, addItemToCart }}>
+    <CartContext.Provider value={{ cartItems, totalAmount, addItemToCart, UpdateItemInCart, err }}>
       {children}
     </CartContext.Provider>
   );

@@ -109,7 +109,7 @@ const handleCart = () => {
               <IconButton onClick={handleCart}>
                 <ShoppingCartIcon fontSize="small" sx={{color: '#ffffff'}} />
                 <CartBadge
-                  badgeContent={cartItems.length}
+                  badgeContent={cartItems.map(item => item.quantity).reduce((a, b) => a + b, 0)}
                   color="secondary"
                   overlap="circular"
                 />

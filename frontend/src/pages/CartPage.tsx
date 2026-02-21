@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Box, Typography } from "@mui/material";
 import Button from '@mui/material/Button';
 import ButtonGroup from '@mui/material/ButtonGroup';
@@ -7,7 +8,20 @@ import { useCart } from "../context/Cart/CartContext";
 
 const CartPage = () => {
 
-    const {cartItems, totalAmount} = useCart();
+    const {cartItems, totalAmount, UpdateItemInCart, err} = useCart();
+    const [error, setError] = useState("");
+
+    const handleQuantityMinus = (productId: string, quantity: number) => {
+        if (quantity <= 1) {
+          return;
+        }
+        UpdateItemInCart(productId, quantity - 1);
+        setError(err);
+    }
+    const handleQuantityPlus = (productId: string, quantity: number) => {
+        UpdateItemInCart(productId, quantity + 1);
+        setError(err);
+    }
 
 
     return (
@@ -37,12 +51,13 @@ const CartPage = () => {
               </Box>
             </Box>
             <ButtonGroup variant="contained" aria-label="Basic button group">
-              <Button>-</Button>
-              <Button>+</Button>
+              <Button onClick={() => handleQuantityMinus(item.productId, item.quantity)} >-</Button>
+              <Button onClick={() => handleQuantityPlus(item.productId, item.quantity)} >+</Button>
             </ButtonGroup>
           </Box>
         ))}
         <Box sx={{ mt: 2 }}><Typography variant="h4">Total: ${totalAmount.toFixed(2)}</Typography></Box>
+        <Typography color="error">{error}</Typography>
       </Container>
     );
 };
