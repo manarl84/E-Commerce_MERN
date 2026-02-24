@@ -8,6 +8,7 @@ interface CartContextType {
     err: string;
     addItemToCart: (productId: string) => void;
     UpdateItemInCart: (productId: string, quantity: number) => void;
+    deleteItemInCart: (productId: string) => void;
 }
 
 export const CartContext = createContext<CartContextType>({
@@ -15,7 +16,8 @@ export const CartContext = createContext<CartContextType>({
     totalAmount: 0,
     err: "",
     addItemToCart: () => {},
-    UpdateItemInCart: () => {}
+    UpdateItemInCart: () => {},
+    deleteItemInCart: () => {}
 });
 
 export const useCart = () => useContext(CartContext); // custom hook to use the auth context

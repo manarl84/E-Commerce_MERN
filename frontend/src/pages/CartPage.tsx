@@ -8,7 +8,7 @@ import { useCart } from "../context/Cart/CartContext";
 
 const CartPage = () => {
 
-    const {cartItems, totalAmount, UpdateItemInCart, err} = useCart();
+    const {cartItems, totalAmount, UpdateItemInCart,deleteItemInCart, err} = useCart();
     const [error, setError] = useState("");
 
     const handleQuantityMinus = (productId: string, quantity: number) => {
@@ -20,6 +20,11 @@ const CartPage = () => {
     }
     const handleQuantityPlus = (productId: string, quantity: number) => {
         UpdateItemInCart(productId, quantity + 1);
+        setError(err);
+    }
+
+    const HandleRemoveItem = (productId: string) => {
+        deleteItemInCart(productId);
         setError(err);
     }
 
@@ -47,7 +52,7 @@ const CartPage = () => {
                   {" "}
                   {item.quantity} x ${item.unitPrice}{" "}
                 </Typography>
-                <Button size="small">Remove Item</Button>
+                <Button onClick={() => HandleRemoveItem(item.productId)} size="small">Remove Item</Button>
               </Box>
             </Box>
             <ButtonGroup variant="contained" aria-label="Basic button group">
